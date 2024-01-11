@@ -83,7 +83,7 @@ def parse_second_subgroup(pair_column, pair_type_column, pair_description_column
     pair_names = ["первая", "вторая", "третья", "четвертая", "пятая", "шестая", "седьмая"]
 
     for day_index, (day, start, end) in enumerate(zip(days, start_rows, end_rows)):
-        day_schedule = {"SchID": f"{schid_prefix}_{day_index+1}"}
+        day_schedule = {"SchID": f"{schid_prefix}_{day_index + 1}"}
         for pair_index, row in enumerate(range(start, end + 1, 5)):
             if ws.cell(row=row, column=pair_column).value is not None:
                 pair_number = pair_names[pair_index]
@@ -118,7 +118,8 @@ def parse_second_subgroup(pair_column, pair_type_column, pair_description_column
                 else:
                     classroom = ""
 
-                if pair_type in ["", None] and subject_name in ["", None] and lecturer in ["", None] and classroom in ["", None]:
+                if pair_type in ["", None] and subject_name in ["", None] and lecturer in ["", None] and classroom in [
+                    "", None]:
                     day_schedule[f"{pair_number} пара"] = "нет"
                 else:
                     day_of_week = DayOfWeek(pair_type, subject_name, classroom, lecturer)
@@ -128,6 +129,21 @@ def parse_second_subgroup(pair_column, pair_type_column, pair_description_column
     with open(filename, 'w', encoding='utf-8') as f:
         json.dump(week, f, ensure_ascii=False, indent=4)
 
+
+def merge_json_files(json_files, output_filename):
+    result = []
+    for file in json_files:
+        with open(file, 'r', encoding='utf-8') as f:  # указываем кодировку 'utf-8'
+            data = json.load(f)
+            result.append(data)
+
+    with open(output_filename, 'w', encoding='utf-8') as f:  # указываем кодировку 'utf-8'
+        json.dump(result, f, ensure_ascii=False)  # добавляем ensure_ascii=False
+
+
+# список файлов для объединения
+file_names = ['нечет_ивт-231-1.json', 'нечет_ивт-231-2.json', 'нечет_ивт-232-1.json', 'нечет_ивт-232-2.json',
+              'чет_ивт-231-1.json', 'чет_ивт-231-2.json', 'чет_ивт-232-1.json', 'чет_ивт-232-2.json']
 
 # Парсим расписание на нечётной неделе для подгрупп
 parse_first_subgroup(2, 3, 4, 'ИВТ-231-1_нечет', 'нечет_ивт-231-1.json')
@@ -140,3 +156,5 @@ parse_first_subgroup(10, 11, 12, 'ИВТ-231-1_чет', 'чет_ивт-231-1.jso
 parse_second_subgroup(10, 11, 13, 'ИВТ-231-2_чет', 'чет_ивт-231-2.json')
 parse_first_subgroup(10, 14, 15, 'ИВТ-232-1_чет', 'чет_ивт-232-1.json')
 parse_second_subgroup(10, 14, 16, 'ИВТ-232-2_чет', 'чет_ивт-232-2.json')
+
+merge_json_files(file_names, 'output.json')
